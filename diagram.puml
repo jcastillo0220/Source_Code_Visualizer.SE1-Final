@@ -1,0 +1,92 @@
+@startuml
+skinparam classAttributeIconSize 0
+class MallardDuck {
+  display() : void
+}
+Duck <|-- MallardDuck
+class RedHeadDuck {
+  display() : void
+}
+Duck <|-- RedHeadDuck
+class ModelDuck {
+  display() : void
+}
+Duck <|-- ModelDuck
+interface FlyBehavior {
+  fly() : void
+}
+class Quack {
+  quack() : void
+}
+QuackBehavior <|.. Quack
+interface QuackBehavior {
+  quack() : void
+}
+class Squeak {
+  quack() : void
+}
+QuackBehavior <|.. Squeak
+class FlyNoWay {
+  fly() : void
+}
+FlyBehavior <|.. FlyNoWay
+class FakeQuack {
+  quack() : void
+}
+QuackBehavior <|.. FakeQuack
+class AnimalTest {
+  main(args : String[]) : void
+  makeSomeAnimals() : void
+}
+class Animal {
+  makeSound() : void
+}
+class Dog {
+  makeSound() : void
+  bark() : void
+}
+Animal <|-- Dog
+class Cat {
+  makeSound() : void
+  meow() : void
+}
+Animal <|-- Cat
+class MuteQuack {
+  quack() : void
+}
+QuackBehavior <|.. MuteQuack
+class Duck {
+  flyBehavior : FlyBehavior
+  quackBehavior : QuackBehavior
+  setFlyBehavior(fb : FlyBehavior) : void
+  setQuackBehavior(qb : QuackBehavior) : void
+  display() : void
+  performFly() : void
+  performQuack() : void
+  swim() : void
+}
+class DecoyDuck {
+  display() : void
+}
+Duck <|-- DecoyDuck
+class FlyWithWings {
+  fly() : void
+}
+FlyBehavior <|.. FlyWithWings
+class FlyRocketPowered {
+  fly() : void
+}
+FlyBehavior <|.. FlyRocketPowered
+class MiniDuckSimulator {
+  main(args : String[]) : void
+}
+class MiniDuckSimulator1 {
+  main(args : String[]) : void
+}
+class RubberDuck {
+  display() : void
+}
+Duck <|-- RubberDuck
+Duck --> FlyBehavior
+Duck --> QuackBehavior
+@enduml
