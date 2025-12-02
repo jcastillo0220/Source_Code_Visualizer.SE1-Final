@@ -1,67 +1,109 @@
 @startuml
 !pragma layout elk
 skinparam classAttributeIconSize 0
-class DataSource {
+class DecoyDuck {
+  display() : void
 }
-interface Repository {
-  save(entity : T) : void
+Duck <|-- DecoyDuck
+class DecoyFly {
+  fly() : void
 }
-class User {
-  id : UUID
-  name : String
-  getName() : String
+FlyBehavior <|.. DecoyFly
+class DecoyQuack {
+  quack() : void
 }
-class UserRepository {
-  dataSource : DataSource
-  save(user : User) : void
+QuackBehavior <|.. DecoyQuack
+class DecoySwim {
+  swim() : void
 }
-Repository <|.. UserRepository
-class UmlGuiApp {
-  sourcePathField : TextField
-  outputPumlField : TextField
-  pumlArea : TextArea
-  legendList : ListView<String>
-  preview : ImageView
-  status : Label
-  useElkLayout : CheckBox
-  generateBtn : Button
-  exportPngBtn : Button
-  tempWorkDir : Path
-  lastSymbolClicked : String
-  lastMatchIndex : int
-  UML_SYMBOLS : Map<String, String>
-  start(stage : Stage) : void
-  chooseFolder(stage : Stage) : void
-  generateUml() : void
-  exportPng(stage : Stage) : void
-  unzipToTemp(zip : Path, tempDir : Path) : Path
-  highlightNextSymbolInPuml(symbol : String) : void
-  extractRelationship(text : String, symbol : String, index : int) : String
-  describeRelationship(left : String, arrow : String, right : String) : String
-  setStatus(msg : String) : void
-  main(args : String[]) : void
+SwimBehavior <|.. DecoySwim
+class Duck {
+  flyBehavior : FlyBehavior
+  quackBehavior : QuackBehavior
+  swimBehavior : SwimBehavior
+  walkBehavior : WalkBehavior
+  setFlyBehavior(fb : FlyBehavior) : void
+  setQuackBehavior(qb : QuackBehavior) : void
+  setSwimBehavior(sb : SwimBehavior) : void
+  setWalkBehavior(wb : WalkBehavior) : void
+  display() : void
+  performFly() : void
+  performQuack() : void
+  performSwim() : void
+  performWalk() : void
 }
-Application <|-- UmlGuiApp
+interface FlyBehavior {
+  fly() : void
+}
 class Main {
   main(args : String[]) : void
 }
-class UmlModel {
-  types : Map<String, UmlType>
-  associations : List<String[]>
+class MallardDuck {
+  display() : void
 }
-class UmlType {
-  name : String
-  kind : Kind
-  fields : List<String>
-  methods : List<String>
-  extendsTypes : List<String>
-  implementsTypes : List<String>
+Duck <|-- MallardDuck
+class MallardFly {
+  fly() : void
 }
-enum Kind {
+FlyBehavior <|.. MallardFly
+class MallardQuack {
+  quack() : void
 }
-class PlantUmlRenderer {
-  toPlantUml(model : UmlModel) : String
+QuackBehavior <|.. MallardQuack
+class MallardSwim {
+  swim() : void
 }
-UserRepository --> DataSource
-UmlType --> Kind
+SwimBehavior <|.. MallardSwim
+class MiniDuckSimulator {
+  main(args : String[]) : void
+}
+interface QuackBehavior {
+  quack() : void
+}
+class RubberDuck {
+  display() : void
+}
+Duck <|-- RubberDuck
+class RubberFly {
+  fly() : void
+}
+FlyBehavior <|.. RubberFly
+class RubberQuack {
+  quack() : void
+}
+QuackBehavior <|.. RubberQuack
+class RubberSwim {
+  swim() : void
+}
+SwimBehavior <|.. RubberSwim
+class SAFly {
+  fly() : void
+}
+FlyBehavior <|.. SAFly
+class SanAntonioDuck {
+  display() : void
+}
+Duck <|-- SanAntonioDuck
+class SAQuack {
+  quack() : void
+}
+QuackBehavior <|.. SAQuack
+class SASwim {
+  swim() : void
+}
+SwimBehavior <|.. SASwim
+class SAWalk {
+  walk() : void
+}
+WalkBehavior <|.. SAWalk
+interface SwimBehavior {
+  swim() : void
+}
+interface WalkBehavior {
+  walk() : void
+}
+Duck --> FlyBehavior
+Duck --> QuackBehavior
+Duck --> SwimBehavior
+Duck --> WalkBehavior
 @enduml

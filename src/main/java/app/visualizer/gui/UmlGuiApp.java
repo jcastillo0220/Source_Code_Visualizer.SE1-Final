@@ -127,6 +127,7 @@ public class UmlGuiApp extends Application {
             event.consume();
         });
 
+        // Allows you to scroll through the picture
         scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
             if (event.isControlDown()) {
                 double zoomFactor = (event.getDeltaY() > 0) ? 1.1 : 0.9;
@@ -218,6 +219,7 @@ public class UmlGuiApp extends Application {
         stage.show();
     }
 
+    //Created by: Jose Torres
     private void chooseFolder(Stage stage) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Select Source Folder (contains .java files)");
@@ -228,6 +230,7 @@ public class UmlGuiApp extends Application {
         }
     }
 
+    //Created by: Javier Castillo
     private void generateUml() {
         Path src = Paths.get(sourcePathField.getText().trim());
         if (sourcePathField.getText().trim().isEmpty()) {
@@ -283,6 +286,7 @@ public class UmlGuiApp extends Application {
                 return null;
             }
 
+            //Created By: Joaquin Castillo & Jose Torres
             @Override
             protected void succeeded() {
                 pumlArea.setText(pumlText);
@@ -320,6 +324,7 @@ public class UmlGuiApp extends Application {
         t.start();
     }
 
+    //Created By: Jose Torres
     private void exportPng(Stage stage) {
         if (preview.getImage() == null) {
             setStatus("No preview image to export.");
@@ -341,6 +346,7 @@ public class UmlGuiApp extends Application {
         }
     }
 
+    //Created By: Mario Rodriguez
     private static Path unzipToTemp(Path zip, Path tempDir) throws IOException {
         Path dest = tempDir.resolve(zip.getFileName().toString().replaceFirst("\\.zip$", ""));
         Files.createDirectories(dest);
@@ -360,6 +366,7 @@ public class UmlGuiApp extends Application {
         return dest;
     }
 
+    //Created By: Javier Castillo
     private static final Map<String, String> UML_SYMBOLS = Map.ofEntries(
             Map.entry("-->", "Association"),
             Map.entry("<--", "Association (reverse)"),
@@ -372,6 +379,7 @@ public class UmlGuiApp extends Application {
             Map.entry("I", "Interface")
     );
 
+    //Created By: Javier Castillo
     private void highlightNextSymbolInPuml(String symbol) {
         String text = pumlArea.getText();
         int startIndex = 0;
@@ -407,6 +415,7 @@ public class UmlGuiApp extends Application {
         }
     }
 
+    //Created By: Jose Torres
     private String extractRelationship(String text, String symbol, int index) {
         int lineStart = text.lastIndexOf("\n", index);
         int lineEnd = text.indexOf("\n", index);
@@ -427,6 +436,7 @@ public class UmlGuiApp extends Application {
         return null;
     }
 
+    //Created By: Joaquin Castillo
     private String describeRelationship(String left, String arrow, String right) {
         switch (arrow) {
             case "-->": case "<--": return left + " is associated with " + right;
@@ -439,6 +449,7 @@ public class UmlGuiApp extends Application {
         }
     }
 
+    //Created By: Mario Rodriguez
     private void setStatus(String msg) {
         Platform.runLater(() -> status.setText(msg));
     }

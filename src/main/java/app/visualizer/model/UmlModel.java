@@ -2,6 +2,7 @@ package app.visualizer.model;
 
 import java.util.*;
 
+//Created By: Javier Castillo
 public class UmlModel {
     public static class UmlType {
         public enum Kind { CLASS, INTERFACE, ENUM, RECORD }

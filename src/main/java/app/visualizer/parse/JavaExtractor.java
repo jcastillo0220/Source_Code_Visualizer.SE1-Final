@@ -5,14 +5,12 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
-
-
+//Created By: Jose Torres
 public class JavaExtractor {
     public UmlModel extract(Path srcRoot) throws IOException {
         UmlModel model = new UmlModel();
