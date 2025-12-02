@@ -20,30 +20,44 @@ Go to https://maven.apache.org/download.cgi or click below...
 Download the binary zip archive: https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
 
 ## Step 3: Installation
-Unzip/install somewhere permanent.
-```bash
-# Example Path:
-C:\apache-maven-3.9.11
-```
+Unzip/extract to somewhere permanent.
 
-## Step 4: Add Maven to Path
+Preferably within Program Files or your drive
+> C:\apache-maven-3.9.11
+
+
+## Step 4: Set Maven Environment Variables
 > **This will require you to edit internal Windows systems**
 
 - Press **Win + R**, type `sysdm.cpl`, hit Enter.
-- Go to Advanced → Environment Variables.
-- Under System variables, find `Path`, click Edit
-- Now Add...
-```Bash
-# Example Path:
-C:\apache-maven-3.9.11\bin
-```
-- Also add a new variable:
+- Go to **Advanced** → **Environment Variables**.
+- Under **System variables**, find `Path`, click Edit or double-click
+- Now, click New and Add (Make sure your file path includes the actual **bin folder**)...
+  - > C:\apache-maven-3.9.11\bin
+- Also add a new variable under **System variables**:
   - Name: MAVEN_HOME
   - Value: C:\apache-maven-3.9.11
+
+## Step 5: Set Java Environment Variables
+> **This will require you to edit internal Windows systems**
+
+Continuing from Step 4.
+
+- Find where your Java JDK is installed: `C:\Program Files\Java\jdk-17` or `C:\Users\Fakeuser\.jdks\corretto-24.0.2`
+- Add a new system variable:
+  - Variable name: JAVA_HOME
+  - Variable value: C:\Program Files\Java\jdk-17
+- Edit `Path` again and add: 
+  - >%JAVA_HOME%\bin
+
 
 
 
 ## Step 5: Verify Installation
+Reload your Powershell/Command Line
+OR
+restart Intellij
+
 Now once again run the following command in Powershell
 ```bash
 mvn -v
