@@ -1,42 +1,58 @@
-# UML Visualizer (Java → PlantUML)
+# UML Class Diagram Visualizer
 
-A minimal Java CLI that parses a Java `src/` folder, extracts classes/interfaces/enums/records and relationships, and emits a PlantUML class diagram file (`diagram.puml`).
+A minimal JavaFX application that allows you to input files and output a class diagram from PlantUML.
 
-## Build
+Below is a step-by-step process to get this to run on your computer (\****Windows 11 ONLY**\**)
+
+## Step 1: Check if Maven is installed
+Run this in your Powershell/Terminal:
 ```bash
-cd uml-visualizer
-mvn -q -DskipTests package
+mvn -v
+```
+If you get an error, continue to step 2.
+
+If not, skip to step 6.
+
+
+## Step 2: Download Maven
+Go to https://maven.apache.org/download.cgi or click below...
+
+Download the binary zip archive: https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
+
+## Step 3: Installation
+Unzip/install somewhere permanent.
+```bash
+# Example Path:
+C:\apache-maven-3.9.11
 ```
 
-## Run
-```bash
-# Example: parse a local src folder and write diagram.puml
-java -cp target/uml-visualizer-0.1.0.jar:$(mvn -q -Dexec.classpathScope=runtime -DincludeScope=runtime -Dexpression=project.runtimeClasspathElements --non-recursive -DforceStdout org.codehaus.mojo:exec-maven-plugin:3.1.0:evaluate) app.visualizer.Main ./example-src diagram.puml
+## Step 4: Add Maven to Path
+> **This will require you to edit internal Windows systems**
+
+- Press **Win + R**, type `sysdm.cpl`, hit Enter.
+- Go to Advanced → Environment Variables.
+- Under System variables, find `Path`, click Edit
+- Now Add...
+```Bash
+# Example Path:
+C:\apache-maven-3.9.11\bin
 ```
+- Also add a new variable:
+  - Name: MAVEN_HOME
+  - Value: C:\apache-maven-3.9.11
 
-Or simpler if you install PlantUML and just want the .puml to open in an IDE:
 
+
+## Step 5: Verify Installation
+Now once again run the following command in Powershell
 ```bash
-java -jar target/uml-visualizer-0.1.0.jar ./example-src diagram.puml
+mvn -v
 ```
+- You should see Maven version info and Java version info.
 
-> If the shaded JAR isn't built, you can run from your IDE with Program Args: `<path-to-src> diagram.puml`.
-
-## Render PNG/SVG
-Use PlantUML:
+## Step 6: Run the Project
+1. Navigate to your project folder (Unless you are already in Intellij, then run this in your terminal)
+2. Now run:
 ```bash
-plantuml diagram.puml
-# Produces diagram.png
+mvn clean javafx:run 
 ```
-
-## Notes
-- Associations are inferred when a field type references another known type (very lightweight heuristic).
-- Improve accuracy by expanding `inferAssociations` and adding visibility/static/abstract parsing.
-
-
-## IntelliJ IDEA quick start
-1. File → Open → select the `uml-visualizer` folder (Maven project).
-2. Ensure Project SDK is set to JDK 17 (File → Project Structure → Project).
-3. Build: View → Tool Windows → Maven → Lifecycle → package (produces `target/uml-visualizer-0.1.0-all.jar`).
-4. Run: Run → Edit Configurations… → + Application → Main class: `app.visualizer.Main`; Program arguments: `./example-src diagram.puml`.
-5. View the `.puml`: install the PlantUML plugin (Settings → Plugins → Marketplace → "PlantUML Integration"), then open `diagram.puml`.
