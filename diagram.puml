@@ -1,92 +1,67 @@
 @startuml
+!pragma layout elk
 skinparam classAttributeIconSize 0
-class MallardDuck {
-  display() : void
+class DataSource {
 }
-Duck <|-- MallardDuck
-class RedHeadDuck {
-  display() : void
+interface Repository {
+  save(entity : T) : void
 }
-Duck <|-- RedHeadDuck
-class ModelDuck {
-  display() : void
+class User {
+  id : UUID
+  name : String
+  getName() : String
 }
-Duck <|-- ModelDuck
-interface FlyBehavior {
-  fly() : void
+class UserRepository {
+  dataSource : DataSource
+  save(user : User) : void
 }
-class Quack {
-  quack() : void
-}
-QuackBehavior <|.. Quack
-interface QuackBehavior {
-  quack() : void
-}
-class Squeak {
-  quack() : void
-}
-QuackBehavior <|.. Squeak
-class FlyNoWay {
-  fly() : void
-}
-FlyBehavior <|.. FlyNoWay
-class FakeQuack {
-  quack() : void
-}
-QuackBehavior <|.. FakeQuack
-class AnimalTest {
-  main(args : String[]) : void
-  makeSomeAnimals() : void
-}
-class Animal {
-  makeSound() : void
-}
-class Dog {
-  makeSound() : void
-  bark() : void
-}
-Animal <|-- Dog
-class Cat {
-  makeSound() : void
-  meow() : void
-}
-Animal <|-- Cat
-class MuteQuack {
-  quack() : void
-}
-QuackBehavior <|.. MuteQuack
-class Duck {
-  flyBehavior : FlyBehavior
-  quackBehavior : QuackBehavior
-  setFlyBehavior(fb : FlyBehavior) : void
-  setQuackBehavior(qb : QuackBehavior) : void
-  display() : void
-  performFly() : void
-  performQuack() : void
-  swim() : void
-}
-class DecoyDuck {
-  display() : void
-}
-Duck <|-- DecoyDuck
-class FlyWithWings {
-  fly() : void
-}
-FlyBehavior <|.. FlyWithWings
-class FlyRocketPowered {
-  fly() : void
-}
-FlyBehavior <|.. FlyRocketPowered
-class MiniDuckSimulator {
+Repository <|.. UserRepository
+class UmlGuiApp {
+  sourcePathField : TextField
+  outputPumlField : TextField
+  pumlArea : TextArea
+  legendList : ListView<String>
+  preview : ImageView
+  status : Label
+  useElkLayout : CheckBox
+  generateBtn : Button
+  exportPngBtn : Button
+  tempWorkDir : Path
+  lastSymbolClicked : String
+  lastMatchIndex : int
+  UML_SYMBOLS : Map<String, String>
+  start(stage : Stage) : void
+  chooseFolder(stage : Stage) : void
+  generateUml() : void
+  exportPng(stage : Stage) : void
+  unzipToTemp(zip : Path, tempDir : Path) : Path
+  highlightNextSymbolInPuml(symbol : String) : void
+  extractRelationship(text : String, symbol : String, index : int) : String
+  describeRelationship(left : String, arrow : String, right : String) : String
+  setStatus(msg : String) : void
   main(args : String[]) : void
 }
-class MiniDuckSimulator1 {
+Application <|-- UmlGuiApp
+class Main {
   main(args : String[]) : void
 }
-class RubberDuck {
-  display() : void
+class UmlModel {
+  types : Map<String, UmlType>
+  associations : List<String[]>
 }
-Duck <|-- RubberDuck
-Duck --> FlyBehavior
-Duck --> QuackBehavior
+class UmlType {
+  name : String
+  kind : Kind
+  fields : List<String>
+  methods : List<String>
+  extendsTypes : List<String>
+  implementsTypes : List<String>
+}
+enum Kind {
+}
+class PlantUmlRenderer {
+  toPlantUml(model : UmlModel) : String
+}
+UserRepository --> DataSource
+UmlType --> Kind
 @enduml

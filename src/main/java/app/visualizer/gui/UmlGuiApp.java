@@ -5,13 +5,18 @@ import app.visualizer.parse.JavaExtractor;
 import app.visualizer.render.PlantUmlRenderer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
@@ -21,21 +26,33 @@ import net.sourceforge.plantuml.SourceStringReader;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+//To run it in the terminal
+//mvn clean javafx:run
+
+
+//Setting up Application: Mario Rodriguez
 public class UmlGuiApp extends Application {
 
     private TextField sourcePathField;
     private TextField outputPumlField;
     private TextArea pumlArea;
+    private ListView<String> legendList;
     private ImageView preview;
     private Label status;
     private CheckBox useElkLayout;
     private Button generateBtn;
     private Button exportPngBtn;
     private Path tempWorkDir;
+    private String lastSymbolClicked = null;
+    private int lastMatchIndex = -1;
 
+    //Fixing buttons into place: Mario Rodriguez
     @Override
     public void start(Stage stage) throws Exception {
         tempWorkDir = Files.createTempDirectory("umlviz-");
@@ -70,17 +87,85 @@ public class UmlGuiApp extends Application {
         pumlArea = new TextArea();
         pumlArea.setPromptText("Generated PlantUML will appear here…");
         pumlArea.setWrapText(false);
+        pumlArea.setMinHeight(500);
+
+        // === Legend ===
+        legendList = new ListView<>();
+        legendList.setPrefHeight(150);
+        legendList.setStyle("-fx-font-family: 'monospace'; -fx-font-size: 12px;");
+        legendList.setOnMouseClicked(event -> {
+            String selected = legendList.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                String symbol = selected.split(":")[0].trim();
+                if (symbol.equals("C") || symbol.equals("I")) {
+                    setStatus("Legend item '" + symbol + "' is informational only.");
+                    return;
+                }
+                highlightNextSymbolInPuml(symbol);
+            }
+        });
 
         preview = new ImageView();
         preview.setPreserveRatio(true);
-        preview.setFitWidth(800);
-        preview.setFitHeight(800);
-        ScrollPane scrollImg = new ScrollPane(preview);
-        scrollImg.setFitToWidth(true);
-        scrollImg.setFitToHeight(true);
+        preview.setSmooth(true);
 
-        VBox left = new VBox(new Label("PlantUML"), pumlArea);
-        VBox right = new VBox(new Label("Preview"), scrollImg);
+        Group zoomGroup = new Group(preview);
+        ScrollPane scrollPane = new ScrollPane(zoomGroup);
+        scrollPane.setPannable(true);
+        scrollPane.setFitToWidth(false);
+        scrollPane.setFitToHeight(false);
+
+        preview.setOnScroll(event -> {
+            double delta = event.getDeltaY();
+            double scale = preview.getScaleX() + delta / 400;
+            scale = Math.max(0.1, Math.min(scale, 10)); // clamp scale
+
+            preview.setScaleX(scale);
+            preview.setScaleY(scale);
+
+            // Scroll bars will shrink automatically as content grows
+            event.consume();
+        });
+
+        scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+            if (event.isControlDown()) {
+                double zoomFactor = (event.getDeltaY() > 0) ? 1.1 : 0.9;
+
+                Bounds viewportBounds = scrollPane.getViewportBounds();
+                Bounds contentBounds = zoomGroup.localToScene(zoomGroup.getBoundsInLocal());
+
+                double mouseX = event.getSceneX();
+                double mouseY = event.getSceneY();
+
+                double offsetX = mouseX - contentBounds.getMinX();
+                double offsetY = mouseY - contentBounds.getMinY();
+
+                zoomGroup.setScaleX(zoomGroup.getScaleX() * zoomFactor);
+                zoomGroup.setScaleY(zoomGroup.getScaleY() * zoomFactor);
+
+                scrollPane.layout();
+
+                double newWidth = zoomGroup.getBoundsInParent().getWidth();
+                double newHeight = zoomGroup.getBoundsInParent().getHeight();
+
+                double dx = offsetX * (zoomFactor - 1);
+                double dy = offsetY * (zoomFactor - 1);
+
+                double newH = (scrollPane.getHvalue() * (newWidth - viewportBounds.getWidth()) + dx)
+                        / (newWidth - viewportBounds.getWidth());
+                double newV = (scrollPane.getVvalue() * (newHeight - viewportBounds.getHeight()) + dy)
+                        / (newHeight - viewportBounds.getHeight());
+
+                scrollPane.setHvalue(Math.max(0, Math.min(newH, 1)));
+                scrollPane.setVvalue(Math.max(0, Math.min(newV, 1)));
+
+                event.consume();
+            }
+        });
+
+        VBox left = new VBox(new Label("PlantUML"), pumlArea, new Label("Legend"), legendList);
+        left.setSpacing(4);
+        VBox right = new VBox(new Label("Preview"), scrollPane);
         left.setSpacing(4);
         right.setSpacing(4);
 
@@ -201,8 +286,20 @@ public class UmlGuiApp extends Application {
             @Override
             protected void succeeded() {
                 pumlArea.setText(pumlText);
+                ObservableList<String> legendItems = FXCollections.observableArrayList();
+                for (Map.Entry<String, String> entry : UML_SYMBOLS.entrySet()) {
+                    if (pumlText.contains(entry.getKey())) {
+                        legendItems.add(String.format("%-6s : %s", entry.getKey(), entry.getValue()));
+                    }
+                }
+                legendList.setItems(legendItems);
                 if (image != null) {
                     preview.setImage(image);
+                    preview.setFitWidth(800);
+                    preview.setFitHeight(800);
+                    preview.setPreserveRatio(true);
+                    preview.setSmooth(true);
+                    preview.setCache(true);
                     exportPngBtn.setDisable(false);
                     setStatus("Done. Saved " + Paths.get(outName).toAbsolutePath());
                 } else {
@@ -261,6 +358,85 @@ public class UmlGuiApp extends Application {
             }
         }
         return dest;
+    }
+
+    private static final Map<String, String> UML_SYMBOLS = Map.ofEntries(
+            Map.entry("-->", "Association"),
+            Map.entry("<--", "Association (reverse)"),
+            Map.entry("<|--", "Inheritance (extends)"),
+            Map.entry("<|..", "Interface implementation"),
+            Map.entry("..>", "Dependency"),
+            Map.entry("*--", "Composition"),
+            Map.entry("o--", "Aggregation"),
+            Map.entry("C", "Concrete class"),
+            Map.entry("I", "Interface")
+    );
+
+    private void highlightNextSymbolInPuml(String symbol) {
+        String text = pumlArea.getText();
+        int startIndex = 0;
+
+        if (symbol.equals(lastSymbolClicked)) {
+            startIndex = lastMatchIndex + 1;
+        } else {
+            lastSymbolClicked = symbol;
+            lastMatchIndex = -1;
+        }
+
+        int nextIndex = text.indexOf(symbol, startIndex);
+        if (nextIndex >= 0) {
+            pumlArea.selectRange(nextIndex, nextIndex + symbol.length());
+            pumlArea.requestFocus();
+            lastMatchIndex = nextIndex;
+
+            String relationship = extractRelationship(text, symbol, nextIndex);
+            setStatus(relationship != null ? relationship : "Found '" + symbol + "' in diagram.");
+        } else {
+            nextIndex = text.indexOf(symbol);
+            if (nextIndex >= 0) {
+                pumlArea.selectRange(nextIndex, nextIndex + symbol.length());
+                pumlArea.requestFocus();
+                lastMatchIndex = nextIndex;
+
+                String relationship = extractRelationship(text, symbol, nextIndex);
+                setStatus(relationship != null ? relationship : "Wrapped to first '" + symbol + "' in diagram.");
+            } else {
+                setStatus("Symbol '" + symbol + "' not found.");
+                lastMatchIndex = -1;
+            }
+        }
+    }
+
+    private String extractRelationship(String text, String symbol, int index) {
+        int lineStart = text.lastIndexOf("\n", index);
+        int lineEnd = text.indexOf("\n", index);
+        if (lineStart == -1) lineStart = 0;
+        if (lineEnd == -1) lineEnd = text.length();
+
+        String line = text.substring(lineStart, lineEnd).trim();
+
+        Pattern pattern = Pattern.compile("(\\w+)\\s*(<\\|--|<\\|\\.\\.|<--|-->|\\*--|o--|<\\.\\.|\\.\\.>|--\\*|--o)\\s*(\\w+)");
+        Matcher matcher = pattern.matcher(line);
+        if (matcher.find()) {
+            String left = matcher.group(1);
+            String arrow = matcher.group(2);
+            String right = matcher.group(3);
+            return describeRelationship(left, arrow, right);
+        }
+
+        return null;
+    }
+
+    private String describeRelationship(String left, String arrow, String right) {
+        switch (arrow) {
+            case "-->": case "<--": return left + " is associated with " + right;
+            case "<|--": return right + " inherits from " + left;
+            case "<|..": return right + " implements interface " + left;
+            case "..>": case "<..": return right + " depends on " + left;
+            case "*--": case "--*": return left + " is composed of " + right;
+            case "o--": case "--o": return left + " aggregates " + right;
+            default: return left + " relates to " + right;
+        }
     }
 
     private void setStatus(String msg) {

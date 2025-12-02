@@ -2,6 +2,7 @@ package app.visualizer.render;
 
 import app.visualizer.model.UmlModel;
 
+//Created by: Joaquin Castillo
 public class PlantUmlRenderer {
     public String toPlantUml(UmlModel model) {
         StringBuilder sb = new StringBuilder();
